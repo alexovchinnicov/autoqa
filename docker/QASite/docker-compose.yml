@@ -1,0 +1,51 @@
+version: '3.3'
+services:
+    selenoid:
+        image: aerokube/selenoid
+        container_name: selenoid
+        network_mode: bridge
+        volumes:
+          - "/root/.aerokube/selenoid:/etc/selenoid:ro"
+          - "/var/run/docker.sock:/var/run/docker.sock"
+          - "/root/.aerokube/selenoid/video:/opt/selenoid/video"
+          - "/root/.aerokube/selenoid/logs:/opt/selenoid/logs"
+        ports:
+          - 4444:4444
+        command: ["-limit", "50", "-video-output-dir", "/opt/selenoid/video"]
+        restart: always
+
+    selenoid-ui:
+        image: aerokube/selenoid-ui
+        container_name: selenoid-ui
+        network_mode: bridge
+        links:
+            - selenoid
+        ports:
+            - 8080:8080
+        command: ["--selenoid-uri", "http://selenoid:4444"]
+        restart: always
+
+    webdriverserver:
+        image: sptnk/webdrivermanager
+        container_name: webdriverserver
+        network_mode: bridge
+        ports:
+            - 4041:4041
+        restart: always
+ 
+    qasite:
+        depends_on:
+            - selenoid-ui
+            - selenoid
+            - webdriverserver
+        links:
+            - selenoid-ui
+            - selenoid
+            - webdriverserver
+        image: sptnk/qasite
+        container_name: qasite
+        network_mode: bridge
+        ports:
+            - 80:80
+        restart: always
+ 
