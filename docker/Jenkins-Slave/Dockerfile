@@ -38,6 +38,8 @@ RUN mkdir -p ${ALLURE_DIR} \
   && rm -rf /tmp/* \
   && ln -s ${ALLURE_DIR}/bin/allure /usr/bin/allure
 COPY files/allure.yml ${ALLURE_DIR}/config/allure.yml
+RUN mkdir -p /var/log/jenkins \
+  && chown jenkins.jenkins /var/log/jenkins
 
 USER jenkins
 
